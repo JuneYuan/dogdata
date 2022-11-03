@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+package whatsmynamepb;
+
+import "google/api/annotations.proto";
+import "google/protobuf/Empty.proto";
+import "google/protobuf/timestamp.proto";
+
+service WhatsMyName {
+  rpc Count(CountRequest) returns (CountResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+    option (google.api.http) = {
+      post: "/metric/count/create"
+      body: "*"
+    };
+  }
+}
+
+message CountRequest {
+  string name = 1;
+  google.protobuf.Timestamp from_time = 2;
+  google.protobuf.Timestamp to_time = 3;
+  map<string, string> filter_tags = 4;
+  AggsType aggs_type = 5;
+}
+
+enum AggsType {
+  AVG = 0;
+  MIN = 1;
+  MAX = 2;
+  SUM = 3;
+}
