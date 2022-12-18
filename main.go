@@ -16,28 +16,37 @@ var (
 )
 
 func main() {
-	go playWithMetric()
-	http.HandleFunc("/", handler)
+
+	go serveStatsd()
+
+	http.HandleFunc("/", metricHandler)
 	log.Fatal(http.ListenAndServe("127.0.0.1:8000", nil))
 }
 
-func handler(w http.ResponseWriter, r *http.Request) {
-	mu.Lock()
-	count++
-	mu.Unlock()
-	log.Printf("Recv from %q\n", r.RemoteAddr)
-	fmt.Fprintf(w, "Hello DogData!\n")
-	fmt.Fprintf(w, "URL.Path=%q, count=%v\n", r.URL.Path, count)
-}
-
-func playWithMetric() {
+func playWithEvent() {
 	dogstatsdClient, err := statsd.New("127.0.0.1:8125")
 
 	if err != nil {
 		log.Fatal(err)
 	}
-	for {
+	for i := 0; i < 20; i++ {
 		dogstatsdClient.SimpleEvent("An error occurred", "Error message")
-		time.Sleep(10 * time.Second)
+		time.Sleep(2 * time.Second)
 	}
+}
+
+func playWithMetric() {
+	client, err := statsd.New("127.0.0.1:8125",
+		statsd.WithTags([]string{"env:prod", "service:dogdata"}),
+	)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	for i := 0; i < 20; i++ {
+		client.Count("juneyuan.sample", 1, []string{"todayis:great"}, 1)
+		fmt.Printf("sent %v value!\n", i+1)
+		time.Sleep(100 * time.Millisecond)
+	}
+	client.Close()
 }
