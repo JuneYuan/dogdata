@@ -2,11 +2,10 @@ package main
 
 import (
 	"fmt"
+	"github.com/influxdata/influxdb-client-go/v2/api/write"
 	"net"
 	"strconv"
 	"strings"
-
-	"github.com/influxdata/influxdb-client-go/v2/api/write"
 
 	"sideproject/dogdata/common"
 	"sideproject/dogdata/datastore/influx"
@@ -103,26 +102,25 @@ func parseStatsd(data string) (ret StatsdMsg, err error) {
 			} else {
 				return ret, fmt.Errorf("unknown type: %q", e)
 			}
-		case 2:
-			if !strings.HasPrefix(e, "@") {
-				return ret, fmt.Errorf("malformed data, cannot parse %q as sample rate", e)
-			}
-			ret.SampleRate, err = strconv.ParseFloat(e[1:], 64)
-			if err != nil {
-				return ret, fmt.Errorf("malformed data, cannot parse %q as sample rate", e)
-			}
-		case 3:
-			if !strings.HasPrefix(e, "#") {
-				return ret, fmt.Errorf("malformed data, cannot parse %q as tags", e)
-			}
-			// <TAG_KEY_1>:<TAG_VALUE_1>,<TAG_KEY_2>:<TAG_VALUE_2>
-			for _, x := range strings.Split(e[1:], ",") {
-				xxs := strings.Split(x, ":")
-				if len(xxs) != 2 {
-					return ret, fmt.Errorf("malformed data, cannot parse %q as <TAG_KEY>:<TAG_VALUE>", xxs)
+		case 2, 3:
+			if strings.HasPrefix(e, "@") {
+				ret.SampleRate, err = strconv.ParseFloat(e[1:], 64)
+				if err != nil {
+					return ret, fmt.Errorf("malformed data, cannot parse %q as sample rate", e)
 				}
-				ret.Tags = append(ret.Tags, Tag{xxs[0], xxs[1]})
 			}
+			if strings.HasPrefix(e, "#") {
+				// <TAG_KEY_1>:<TAG_VALUE_1>,<TAG_KEY_2>:<TAG_VALUE_2>
+				for _, x := range strings.Split(e[1:], ",") {
+					xxs := strings.Split(x, ":")
+					if len(xxs) != 2 {
+						return ret, fmt.Errorf("malformed data, cannot parse %q as <TAG_KEY>:<TAG_VALUE>", xxs)
+					}
+					ret.Tags = append(ret.Tags, Tag{xxs[0], xxs[1]})
+				}
+			}
+		default:
+			return ret, fmt.Errorf("malformed data, cannot parse %q", e)
 		}
 	}
 	return ret, err
