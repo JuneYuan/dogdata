@@ -2,10 +2,11 @@ package main
 
 import (
 	"fmt"
-	"github.com/influxdata/influxdb-client-go/v2/api/write"
 	"net"
 	"strconv"
 	"strings"
+
+	"github.com/influxdata/influxdb-client-go/v2/api/write"
 
 	"sideproject/dogdata/common"
 	"sideproject/dogdata/datastore/influx"
@@ -82,6 +83,9 @@ func parseStatsd(data string) (ret StatsdMsg, err error) {
 	// [2] - Optioanl - @<SAMPLE_RATE>
 	// [3] - Optioanl - #<TAG_KEY_1>:<TAG_VALUE_1>,<TAG_2>
 	// 有内部结构的，再继续按分隔符解析。注意 `@` `#` 符号
+
+	fmt.Printf("parseStatsd input: %q\n", data)
+
 	elems := strings.Split(data, "|")
 	for i, e := range elems {
 		switch i {
@@ -133,6 +137,7 @@ func convert(msg StatsdMsg) *write.Point {
 	for _, tag := range msg.Tags {
 		ret.AddTag(tag.Key, fmt.Sprintf("%v", tag.Value))
 	}
+	ret.AddField("value", msg.Value)
 	return ret
 }
 
@@ -140,7 +145,7 @@ func convert(msg StatsdMsg) *write.Point {
 // TODO struct can be found in datadog-agent source code?
 type StatsdMsg struct {
 	MetricName string
-	Value      float64
+	Value      float64 // TODO should be general
 	Type       StatsdMsgType
 	SampleRate float64
 	Tags       []Tag

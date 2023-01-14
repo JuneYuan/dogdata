@@ -63,7 +63,7 @@ func Test_convert(t *testing.T) {
 			want: write.NewPoint(
 				"custom_metric",
 				map[string]string{"port": "8125"},
-				nil,
+				map[string]interface{}{"value": float64(80)},
 				time.Now(),
 			),
 		},

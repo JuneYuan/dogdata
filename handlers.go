@@ -22,5 +22,5 @@ func metricHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		fmt.Fprintf(w, "io.RealAll(): %v", err)
 	}
-	fmt.Fprintf(w, "body=%q\n", string(body))
+	fmt.Fprintf(w, "recv metric: %q\n", string(body))
 }
