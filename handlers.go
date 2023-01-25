@@ -7,7 +7,16 @@ import (
 	"net/http"
 )
 
-func handler(w http.ResponseWriter, r *http.Request) {
+func helloReportHandler(w http.ResponseWriter, r *http.Request) {
+	mu.Lock()
+	count++
+	mu.Unlock()
+	log.Printf("Recv from %q\n", r.RemoteAddr)
+	fmt.Fprintf(w, "Hello DogData!\n")
+	fmt.Fprintf(w, "URL.Path=%q, count=%v\n", r.URL.Path, count)
+}
+
+func helloQueryHandler(w http.ResponseWriter, r *http.Request) {
 	mu.Lock()
 	count++
 	mu.Unlock()

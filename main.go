@@ -19,7 +19,8 @@ func main() {
 
 	go serveStatsd()
 
-	http.HandleFunc("/", metricHandler)
+	http.HandleFunc("/report", helloReportHandler)
+	http.HandleFunc("/query", helloQueryHandler)
 	log.Fatal(http.ListenAndServe("127.0.0.1:8000", nil))
 }
 
