@@ -16,6 +16,7 @@ var (
 	url = "http://localhost:8086"
 )
 
+// https://docs.influxdata.com/influxdb/cloud/api-guide/client-libraries/go/
 func main() {
 	//writeExample()
 	readExample()
@@ -43,7 +44,7 @@ func readExample() {
 	// Get query client
 	queryAPI := client.QueryAPI(org)
 	// Get QueryTableResult
-	result, err := queryAPI.Query(context.Background(), `from(bucket:"gospel")|> range(start: -1h) |> filter(fn: (r) => r._measurement == "stat")`)
+	result, err := queryAPI.Query(context.Background(), `from(bucket:"noaa")|> range(start: -24h) |> filter(fn: (r) => r._measurement == "average_temperature")`)
 	if err == nil {
 		// Iterate over query response
 		for result.Next() {
