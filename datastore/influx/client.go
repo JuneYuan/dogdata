@@ -43,7 +43,7 @@ func (c *WrapClient) WritePoint(p *write.Point) error {
 
 func (c *WrapClient) Query() ([]float64, error) {
 	queryAPI := c.client.QueryAPI(c.org)
-	influxRet, err := queryAPI.Query(context.Background(), `from(bucket:"noaa")|> range(start: -24h) |> filter(fn: (r) => r._measurement == "average_temperature")`)
+	influxRet, err := queryAPI.Query(context.Background(), `from(bucket:"noaa")|> range(start: -480h) |> filter(fn: (r) => r._measurement == "average_temperature")`)
 	if err != nil {
 		return nil, fmt.Errorf("queryAPI.Query(): %v", err)
 	}
