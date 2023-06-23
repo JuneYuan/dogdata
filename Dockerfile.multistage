@@ -1,0 +1,36 @@
+# syntax=docker/dockerfile:1
+
+# Build the application from source
+FROM golang:1.20 AS build-stage
+
+WORKDIR /app
+
+COPY . .
+
+RUN go mod download
+
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o /dogdata
+# RUN CGO_ENABLED=0 go build -o /dogdata
+
+# Check if /dogdata exists in the build-stage
+RUN echo "*** Checking /dogdata in the build-stage ***"
+RUN ls -la /dogdata
+
+# Deploy the application binary into a lean image
+FROM alpine
+WORKDIR /
+
+# Add this line to check if /dogdata file exists in the run-stage as well
+RUN echo "*** Checking /dogdata before COPY in the run-stage ***"
+RUN [ ! -f "/dogdata" ] && echo "/dogdata does not exist" || echo "/dogdata exists"
+
+COPY --from=build-stage /dogdata /dogdata
+
+# Check if /dogdata exists after the COPY command in the run-stage
+RUN echo "*** Checking /dogdata after COPY in the run-stage ***"
+RUN [ ! -f "/dogdata" ] && echo "/dogdata does not exist after COPY" || echo "/dogdata exists after COPY"
+RUN chmod +x /dogdata
+
+EXPOSE 8032
+
+ENTRYPOINT ["/dogdata"]

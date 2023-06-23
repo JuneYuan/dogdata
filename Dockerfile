@@ -13,4 +13,3 @@ RUN go build -o /dogdata
 EXPOSE 8032
 
 CMD ["/dogdata"]
-
