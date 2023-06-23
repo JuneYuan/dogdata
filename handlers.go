@@ -7,13 +7,23 @@ import (
 	"log"
 	"net/http"
 	"sideproject/dogdata/datastore/influx"
+	"time"
 )
 
 func helloReportHandler(w http.ResponseWriter, r *http.Request) {
+	go func() {
+		select {
+		case <-time.After(time.Minute):
+			return
+		case <-time.Tick(5 * time.Second):
+			log.Printf("serving /report\n")
+		}
+	}()
 	mu.Lock()
 	count++
 	mu.Unlock()
 	log.Printf("Recv from %q\n", r.RemoteAddr)
+	fmt.Printf("Recv from %q\n", r.RemoteAddr)
 	fmt.Fprintf(w, "Hello DogData!\n")
 	fmt.Fprintf(w, "URL.Path=%q, count=%v\n", r.URL.Path, count)
 }

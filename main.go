@@ -6,8 +6,10 @@ import (
 	"net/http"
 	"sync"
 	"time"
-
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 	"github.com/DataDog/datadog-go/statsd"
+	"os"
 )
 
 var (
@@ -15,13 +17,37 @@ var (
 	count int
 )
 
+func main1() {
+
+	e := echo.New()
+
+	e.Use(middleware.Logger())
+	e.Use(middleware.Recover())
+
+	e.GET("/", func(c echo.Context) error {
+		return c.HTML(http.StatusOK, "Hello, Docker! <3")
+	})
+
+	e.GET("/health", func(c echo.Context) error {
+		return c.JSON(http.StatusOK, struct{ Status string }{Status: "OK"})
+	})
+
+	httpPort := os.Getenv("PORT")
+	if httpPort == "" {
+		httpPort = "8032"
+	}
+
+	e.Logger.Fatal(e.Start(":" + httpPort))
+}
+
 func main() {
 
 	go serveStatsd()
 
 	http.HandleFunc("/report", helloReportHandler)
 	http.HandleFunc("/query", queryHandler)
-	log.Fatal(http.ListenAndServe("127.0.0.1:8000", nil))
+	log.Fatal(http.ListenAndServe("0.0.0.0:8032", nil))
+	// log.Fatal(http.ListenAndServe("127.0.0.1:8032", nil))
 }
 
 func playWithEvent() {
