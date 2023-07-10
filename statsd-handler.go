@@ -13,6 +13,7 @@ import (
 )
 
 func serveStatsd() {
+	// TODO 真正工作的代码，不能只监听 localhost
 	listener, err := net.ListenUDP("udp", &net.UDPAddr{IP: net.ParseIP("127.0.0.1"), Port: 7125})
 	if err != nil {
 		fmt.Println(err)
@@ -24,7 +25,7 @@ func serveStatsd() {
 		n, remoteAddr, err := listener.ReadFromUDP(data)
 		common.CheckErr(err, "listener.ReadFromUDP()")
 
-		//fmt.Printf("<%s> %s\n", remoteAddr, data[:n])
+		// fmt.Printf("<%s> %s\n", remoteAddr, data[:n])
 		// 打印内容改成了存储到 influx
 		err = saveToInflux(string(data[:n]))
 		if err != nil {
@@ -32,6 +33,7 @@ func serveStatsd() {
 			fmt.Printf("saveToInflux(): %v\n", err)
 		}
 
+		// TODO Go network programming in action
 		// 这部分还不确定有什么意义，是照着 go udp example 写的
 		_, err = listener.WriteToUDP([]byte("world"), remoteAddr)
 		if err != nil {
@@ -42,8 +44,9 @@ func serveStatsd() {
 
 // TODO 应当依赖配置获取 url, token
 var (
-	token = "TSmwhXA3hHFZy8i_xAevEDH0iNKfVm4YEw9Wu_mmrCjOcwGUIgNV4rX5VpXA5FLh8nN9zzUSKdyFpLbyOQOBuA=="
-	url   = "http://localhost:8086"
+	token = "pShDwhGCHnWONE6m5jt07i3Sfj08iOXoEgQXZkuR4-kMlMny6udVi1--kXkFcDq7gRIyfBlXWGGcC88hX0DwnQ==" // 2023.6
+	// token = "TSmwhXA3hHFZy8i_xAevEDH0iNKfVm4YEw9Wu_mmrCjOcwGUIgNV4rX5VpXA5FLh8nN9zzUSKdyFpLbyOQOBuA==" // 2023.1
+	url = "http://localhost:8086"
 )
 
 func saveToInflux(data string) error {
