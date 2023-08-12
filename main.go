@@ -4,12 +4,13 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"sync"
 	"time"
+
+	"github.com/DataDog/datadog-go/statsd"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	"github.com/DataDog/datadog-go/statsd"
-	"os"
 )
 
 var (
@@ -44,10 +45,15 @@ func main() {
 
 	go serveStatsd()
 
+	http.HandleFunc("/", helloHandler)
 	http.HandleFunc("/report", helloReportHandler)
 	http.HandleFunc("/query", queryHandler)
 	log.Fatal(http.ListenAndServe("0.0.0.0:8032", nil))
 	// log.Fatal(http.ListenAndServe("127.0.0.1:8032", nil))
+}
+
+func helloHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintf(w, "Hello, Docker! <3")
 }
 
 func playWithEvent() {

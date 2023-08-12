@@ -21,6 +21,7 @@ func serveStatsd() {
 	}
 	fmt.Printf("Local: <%s> \n", listener.LocalAddr().String())
 	data := make([]byte, 1024)
+	// TODO 怎么处理多 client, 并发？
 	for {
 		n, remoteAddr, err := listener.ReadFromUDP(data)
 		common.CheckErr(err, "listener.ReadFromUDP()")

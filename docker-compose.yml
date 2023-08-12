@@ -1,0 +1,13 @@
+version: "3.8"
+services:
+  dogdata:
+    build:
+      context: .
+      dockerfile: Dockerfile.multistage
+    ports:
+      - "8032:8032"
+
+  influxdb:
+    image: influxdb:latest
+    ports:
+      - "8086:8086"
